@@ -1,9 +1,9 @@
 const express = require('express');
- const cors = require('cors');
- require('dotenv').config();
- const { MongoClient, ServerApiVersion } = require('mongodb');
- const app = express();
- const port = process.env.PORT || 5000;
+const cors = require('cors');
+require('dotenv').config();
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const app = express();
+const port = process.env.PORT || 5000;
 
 
 
@@ -30,18 +30,41 @@ async function run() {
 
     const craftCollection = client.db('craftDB').collection('craft')
 
-    app.get('/craft', async(req, res) =>{
+    app.get('/craft', async (req, res) => {
       const cursor = craftCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     })
 
-   app.post('/craft', async(req, res) =>{
-    const newCraft = req.body;
-    console.log(newCraft);
-    const result = await craftCollection.insertOne(newCraft);
-    res.send(result);
-   })
+    app.get('/craft/:id', async (req, res) =>{
+         const id = req.params.id;
+         const query =  {_id: new ObjectId(id)};
+         const result = await craftCollection.findOne(query);
+         res.send(result);
+    })
+
+    app.post('/craft', async (req, res) => {
+      const newCraft = req.body;
+      console.log(newCraft);
+      const result = await craftCollection.insertOne(newCraft);
+      res.send(result);
+    })
+
+    app.get("/myList/:email", async (req, res) => {
+      console.log(req.params.email);
+      const result = await craftCollection.find({email:req.params.email}).toArray();
+      res.send(result);
+    
+    })
+
+    app.delete('/craft/:id', async(req, res) =>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await craftCollection.deleteOne(query);
+      res.send(result);
+    })
+
+   
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
@@ -60,12 +83,15 @@ app.use(cors());
 app.use(express.json());
 
 
-app.get('/', (req, res) =>{
-    res.send('EcoCrafts hub server is running');
+app.get('/', (req, res) => {
+  res.send('EcoCrafts hub server is running');
 
 })
 
 
-app.listen(port, () =>{
-    console.log(`EcoCrafts server is running on port:${port}`);
+app.listen(port, () => {
+  console.log(`EcoCrafts server is running on port:${port}`);
 })
+
+
+

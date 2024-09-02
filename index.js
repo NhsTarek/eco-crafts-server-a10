@@ -1,9 +1,31 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
-const port = process.env.PORT || 5000;
+
+
+const corsOptions ={
+  origin:'*', 
+  credentials:true,
+  optionSuccessStatus:200,
+}
+
+app.use(cors(corsOptions))
+
+
+
+
+app.use(express.json());
+
+
+
+
+
+
+
+
 
 
 
@@ -26,7 +48,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const craftCollection = client.db('craftDB').collection('craft')
 
@@ -43,7 +65,7 @@ async function run() {
          res.send(result);
     })
 
-    app.post('/craft', async (req, res) => {
+    app.post('/addCraftItem', async (req, res) => {
       const newCraft = req.body;
       console.log(newCraft);
       const result = await craftCollection.insertOne(newCraft);
@@ -101,8 +123,7 @@ run().catch(console.dir);
 
 //  Middleware
 
-app.use(cors());
-app.use(express.json());
+
 
 
 app.get('/', (req, res) => {
